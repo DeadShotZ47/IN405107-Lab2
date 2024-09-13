@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 
 public class GatherInput : MonoBehaviour
 {
@@ -36,13 +37,23 @@ public class GatherInput : MonoBehaviour
         controls.Player.Enable();
     }
 
-    private void OnDisable()
+    public void OnDisable()
     {
         controls.Player.Move.performed -= StartMove;
         controls.Player.Move.canceled -= StopMove;
         controls.Player.Jump.performed -= JumpStart;
         controls.Player.Jump.canceled -= JumpStop;
         controls.Player.Disable();
+    }
+
+    public void DisableControls()
+    {
+        controls.Player.Move.performed -= StartMove;
+        controls.Player.Move.canceled -= StopMove;
+        controls.Player.Jump.performed -= JumpStart;
+        controls.Player.Jump.canceled -= JumpStop;
+        controls.Player.Disable();
+        valueX = 0;
     }
 
     private void StartMove(InputAction.CallbackContext ctx) 

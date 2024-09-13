@@ -17,13 +17,17 @@ public class PlayerMoveControl : MonoBehaviour
     public Transform leftPoint;
     private bool grounded = false;
     private bool canDoubleJump = false;
+    private bool knockBack = false;
 
+    private PlayerStats playerStats;
     // Start is called before the first frame update
     void Start()
     {
+        groundLayer = LayerMask.NameToLayer("Ground");
         gatherInput = GetComponent<GatherInput>();
         rigidbody2D = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        playerStats = GetComponent<PlayerStats>();
     }
 
     private void SetAnimatorValue()
@@ -36,7 +40,7 @@ public class PlayerMoveControl : MonoBehaviour
     private void CheckStatus()
     {
         RaycastHit2D leftCheckHit = Physics2D.Raycast(leftPoint.position, Vector2.down, rayLength, groundLayer);
-        grounded = leftCheckHit;
+        grounded = leftCheckHit.collider != null;
 
         if (grounded)
         {
@@ -58,6 +62,7 @@ public class PlayerMoveControl : MonoBehaviour
     private void FixedUpdate()
     {
         CheckStatus();
+        if (knockBack) return;
         Move();
         JumpPlayer();
     }
@@ -96,5 +101,27 @@ public class PlayerMoveControl : MonoBehaviour
             }
         }
         gatherInput.jumpInput = false;
+    }
+
+    public IEnumerator KnockBack(float forceX, float forceY, float duration, Transform otherObject)
+    {
+        int knockBackDirection;
+        if (transform.position.x < otherObject.position.x)
+        {
+            knockBackDirection = -1;
+        }
+        else
+        {
+            knockBackDirection = 1;
+        }
+
+        knockBack = true;
+        rigidbody2D.velocity = Vector2.zero;
+        Vector2 theForce = new Vector2(forceX * knockBackDirection, forceY);
+        rigidbody2D.AddForce(theForce, ForceMode2D.Impulse);
+
+        yield return new WaitForSeconds(duration);
+        knockBack = false;
+        rigidbody2D.velocity = Vector2.zero;
     }
 }
